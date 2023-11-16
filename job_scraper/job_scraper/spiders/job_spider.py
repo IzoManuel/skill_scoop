@@ -1,13 +1,24 @@
+import sys
+#print(sys.path)
 import scrapy
 from urllib.parse import urljoin
-
+print("Scraping ABOVE PIPELINE IMPORT")
+from pipelines import CustomPipeline
+print("Scraping BELOW PIPELINE IMPORT")
 class JobSpider(scrapy.Spider):
     name = 'job_spider'
     start_urls = ['https://www.myjobmag.co.ke/jobs-by-field/information-technology']
 
     skills_to_search = {'python'}
 
+    print("Scraping ABOVE CUSTOME SETTING")
+    custom_settings = {
+        'ITEM_PIPELINES': {'skill_scoop.pipelines.CustomPipeline': 300}
+    }
+    print("Scraping BELOW CUSTOME SETTING")
+
     def start_requests(self):
+        print("Scraping START REQUEST")
         # Define number of pages to srape
         num_pages = 2
         
@@ -16,6 +27,7 @@ class JobSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
+        print("Scraping PARSE")
         for job_listing in response.css('ul.job-list li.job-list-li'):
             yield {
                 'title': job_listing.css('h2 a::text').get(),
@@ -29,6 +41,7 @@ class JobSpider(scrapy.Spider):
 
 
     def parse_job_page(self, response):
+        print("Scraping PARSE_JOB_PAGE")
         # Extracting job details
         job_title = response.css('h2.mag-b span.subjob-title::text').get()
         date_posted = response.css('div.read-date-sec-li#posted-date::text').get()
